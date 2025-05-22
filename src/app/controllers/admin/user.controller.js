@@ -1,0 +1,49 @@
+import * as userService from '@/app/services/user.service'
+import { db } from '@/configs'
+
+export async function getUsers(req, res) {
+    const { page = 1, per_page = 10 } = req.query 
+    const result = await userService.getUsers({ page, per_page })
+    res.json(result)
+}
+
+export async function getUserProfile(req, res) {
+    const user = await userService.getUserProfile(req.params.id)
+    res.jsonify(user)
+}
+
+export async function createUser(req, res) {
+    await db.transaction(async (session) => {
+        const user = await userService.createUser(req.body, session)
+        res.status(201).jsonify({
+            message: 'Người dùng đã được tạo thành công.',
+            data: user
+        })
+    })
+}
+
+export async function updateUser(req, res) {
+    await db.transaction(async (session) => {
+        const updatedUser = await userService.updateUserProfile(req.params.id, req.body, session)
+        res.jsonify({
+            message: 'Cập nhật thông tin người dùng thành công.',
+            data: updatedUser
+        })
+    })
+}
+
+export async function deleteUser(req, res) {
+    await db.transaction(async (session) => {
+        const result = await userService.deleteUser(req.params.id, session)
+        res.jsonify(result)
+    })
+}
+
+export async function activateUser(req, res) {
+    await db.transaction(async (session) => {
+        const result = await userService.activateUser(req.params.id, session)
+        res.jsonify(result)
+    })
+}
+
+

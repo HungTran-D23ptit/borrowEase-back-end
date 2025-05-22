@@ -78,6 +78,7 @@ export async function blockToken(token) {
     await tokenBlocklist.set(token, 1, expiresIn - now)
 }
 
+// Đăng ký
 export async function registerUser(userData) {
     if (!VALIDATE_EMAIL_REGEX.test(userData.email)) {
         abort(400, 'Email không hợp lệ.')

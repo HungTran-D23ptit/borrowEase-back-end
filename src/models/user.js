@@ -26,7 +26,11 @@ const User = createModel(
             default: ''
         },
         address: {
-            type: Date,
+            type: String,
+            default: ''
+        },
+        department: {
+            type: String,
             default: ''
         },
         avatar: {
