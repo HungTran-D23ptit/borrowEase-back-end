@@ -1,15 +1,24 @@
-import {Admin, ROLE, Role} from '@/models'
+import Admin from '@/models/admin.js'
 
 async function adminSeeder(session) {
-    const name = 'Super Admin'
-    const phone = '0987654321'
-    const email = 'admin@gmail.com'
-    const password = 'Z3ntSoft@D3v'
-    const role = await Role.findOne({code: ROLE.SUPER_ADMIN}).session(session)
+    const name = 'Tran Duy Hung'
+    const phone = '0904071148'
+    const email = 'donghaopho431@gmail.com'
+    const password = '12345678'
+    const role = 'admin'
+
     await Admin.findOneAndUpdate(
-        {phone, email},
-        { $set: {name, phone, email, password, role_ids: [role._id]} },
-        { upsert: true, session}
+        {email},
+        {
+            $set: {
+                name,
+                phone,
+                email,
+                password,
+                role,
+            },
+        },
+        {upsert: true, session}
     )
 }
 

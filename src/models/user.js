@@ -16,7 +16,6 @@ const User = createModel(
         },
         phone: {
             type: String,
-            required: true,
         },
         gender: {
             type: String,

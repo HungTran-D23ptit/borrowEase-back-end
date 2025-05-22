@@ -1,4 +1,4 @@
-import {abort, getToken} from '@/utils/helpers'
+import { abort, getToken } from '@/utils/helpers'
 import * as authService from '@/app/services/auth.service'
 
 export async function login(req, res) {
@@ -7,7 +7,7 @@ export async function login(req, res) {
     if (validLogin) {
         res.jsonify(authService.authToken(validLogin))
     } else {
-        abort(400, 'Số điện thoại hoặc mật khẩu không đúng.')
+        abort(400, 'Email hoặc mật khẩu không đúng.')
     }
 }
 
