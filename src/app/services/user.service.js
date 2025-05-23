@@ -1,11 +1,26 @@
-import {User, STATUS_ACCOUNT} from '@/models'
+import {User, Admin, STATUS_ACCOUNT} from '@/models'
 import { abort } from '@/utils/helpers'
 import { FileUpload } from '@/utils/classes'
 import { LINK_STATIC_URL } from '@/configs'
 
-// Cập nhật thông tin người dùng
-export async function updateUserProfile(userId, profileData) {
-    const user = await User.findOne({_id: userId, deleted: false})
+// Lấy thông tin admin
+export async function getAdminProfile(userId) {
+    try {
+        const user = await Admin.findOne({ _id: userId, deleted: false })
+
+        if(user.avatar && !user.avatar.startsWith('https')) {
+            user.avatar = LINK_STATIC_URL + user.avatar
+        }
+
+        return user
+    } catch (error) {
+        abort(500, 'Lỗi khi lấy thông tin người dùng')
+    }
+}
+
+// Cập nhật thông tin admin
+export async function updateAdminProfile(userId, profileData) {
+    const user = await Admin.findOne({_id: userId, deleted: false})
 
     if (profileData.avatar) {
         FileUpload.remove(user.avatar)
@@ -14,7 +29,7 @@ export async function updateUserProfile(userId, profileData) {
     }
 
     try {
-        const updatedUser = await User.findByIdAndUpdate(
+        const updatedUser = await Admin.findByIdAndUpdate(
             userId,
             { $set: profileData },
             { new: true }
@@ -37,6 +52,28 @@ export async function getUserProfile(userId) {
         return user
     } catch (error) {
         abort(500, 'Lỗi khi lấy thông tin người dùng')
+    }
+}
+
+// Cập nhật thông tin người dùng
+export async function updateUserProfile(userId, profileData) {
+    const user = await User.findOne({_id: userId, deleted: false})
+
+    if (profileData.avatar) {
+        FileUpload.remove(user.avatar)
+        profileData.avatar = await profileData.avatar.save()
+        user.avatar = profileData.avatar
+    }
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: profileData },
+            { new: true }
+        )
+        return updatedUser
+    } catch (error) {
+        abort(500, 'Lỗi khi cập nhật thông tin người dùng')
     }
 }
 
@@ -101,5 +138,4 @@ export async function activateUser(userId, session) {
         abort(500, 'Lỗi khi mở khóa tài khoản')
     }
 }
-
 
