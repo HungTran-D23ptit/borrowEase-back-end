@@ -14,19 +14,30 @@ const Device = createModel('Device', 'devices', {
         type: String,
         default: '',
     },
-    status: {
-        type: String,
-        enum: ['AVAILABLE', 'BORROWED', 'BROKEN', 'LOST'],
-        default: 'AVAILABLE',
-    },
-    location: {
+    image_url: {
         type: String,
         default: '',
+    },
+    quantity: {
+        type: Number,
+        default: 1,
+        min: 1,
+    },
+    status: {
+        type: String,
+        enum: ['AVAILABLE', 'BORROWED', 'MAINTENANCE', 'LOST'],
+        default: 'AVAILABLE',
+    },
+    last_borrowed_at: {
+        type: Date,
+        default: null,
     },
     deleted: {
         type: Boolean,
         default: false,
     },
+}, {
+    timestamps: true
 })
 
 export default Device
