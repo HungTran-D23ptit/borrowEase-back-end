@@ -1,4 +1,4 @@
-import Device from '@/models/device'
+import {Device} from '@/models'
 import {abort} from '@/utils/helpers'
 import {FileUpload} from '@/utils/classes'
 import {LINK_STATIC_URL} from '@/configs'
@@ -92,3 +92,5 @@ export async function getDeviceById(deviceId) {
         abort(500, 'Lỗi khi lấy chi tiết thiết bị')
     }
 }
+
+

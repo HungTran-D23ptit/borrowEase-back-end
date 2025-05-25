@@ -1,35 +1,50 @@
-import createModel, {ObjectId} from './base'
+import createModel from './base'
+import mongoose from 'mongoose'
 
 const BorrowRequest = createModel('BorrowRequest', 'borrow_requests', {
-    user_id: {
-        type: ObjectId,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
-    device_id: {
-        type: ObjectId,
+    device: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Device',
         required: true,
     },
-    start_date: {
-        type: Date,
+    quantity: {
+        type: Number,
         required: true,
-    },
-    end_date: {
-        type: Date,
-        required: true,
-    },
-    status: {
-        type: String,
-        enum: ['PENDING', 'APPROVED', 'REJECTED', 'RETURNED'],
-        default: 'PENDING',
+        min: 1,
+        default: 1,
     },
     reason: {
         type: String,
+        required: true,
+    },
+    borrow_date: {
+        type: Date,
+        required: true,
+    },
+    return_date: {
+        type: Date,
+        required: true,
+    },
+    actual_return_date: {
+        type: Date, 
+        default: null,
+    },
+    status: {
+        type: String,
+        enum: ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'RETURNED'],
+        default: 'PENDING',
+    },
+    note: {
+        type: String,
         default: '',
     },
-    deleted: {
-        type: Boolean,
-        default: false,
-    },
+}, {
+    timestamps: true
 })
 
 export default BorrowRequest
