@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { BorrowRequest, Device } from '@/models'
+import { BorrowRequest, Device, Review } from '@/models'
 import { abort } from '@/utils/helpers'
 
 // Tạo đơn mượn thiết bị
@@ -10,8 +10,28 @@ export async function createBorrowRequest(userId, data, session) {
         abort(400, 'Thông tin thiết bị không hợp lệ')
     }
 
-    const device = await Device.findOne({ _id: deviceId, deleted: false }).session(session)
-    
+    const now = new Date()
+
+    // Không cho mượn nếu borrow_date ở quá khứ (tính theo thời điểm hiện tại)
+    if (new Date(borrow_date) < now) {
+        abort(400, 'Ngày mượn không được ở trong quá khứ hoặc quá giờ hiện tại')
+    }
+
+    // Ngày trả phải sau hoặc bằng ngày mượn
+    if (new Date(return_date) < new Date(borrow_date)) {
+        abort(400, 'Ngày trả phải sau hoặc bằng ngày mượn')
+    }
+
+    // Lấy thiết bị và kiểm tra điều kiện
+    const device = await Device.findOne({
+        _id: deviceId,
+        deleted: false,
+    }).session(session)
+
+    if (device.status !== 'NORMAL') {
+        abort(400, `Thiết bị "${device.name}" đang bảo trì`)
+    }
+
     if (device.quantity < quantity) {
         abort(400, `Thiết bị "${device.name}" chỉ còn ${device.quantity} chiếc`)
     }
@@ -109,11 +129,24 @@ export async function getBorrowingDevices({ user, page = 1, per_page = 10 } = {}
 
 // Lấy các thiết bị đang trả trễ (đơn đã duyệt nhưng return_date < ngày hiện tại) 
 export async function getOverdueDevices({ user, page = 1, per_page = 10 } = {}) {
+    const now = new Date()
+
+    // Cập nhật trạng thái OVERDUE trước khi lấy danh sách
+    await BorrowRequest.updateMany(
+        {
+            status: 'APPROVED',
+            return_date: { $lt: now },
+        },
+        { $set: { status: 'OVERDUE' } }
+    )
+
     const filter = {
-        status: 'APPROVED',
-        return_date: { $lt: new Date() },
+        status: 'OVERDUE',
     }
-    if (user) filter.user = user
+
+    if (user) {
+        filter.user = user
+    }
 
     const skip = (page - 1) * per_page
 
@@ -121,7 +154,8 @@ export async function getOverdueDevices({ user, page = 1, per_page = 10 } = {}) 
         BorrowRequest.find(filter)
             .populate('user device')
             .skip(skip)
-            .limit(per_page),
+            .limit(per_page)
+            .sort({ return_date: 1 }),
         BorrowRequest.countDocuments(filter),
     ])
 
@@ -157,14 +191,31 @@ export async function getBorrowRequestDetail({ id, user, isAdmin = false }) {
     return request
 }
 
-// Trả thiết bị
-export async function returnDevice(id) {
+// User yêu cầu trả thiết bị
+export async function requestReturnDevice(id, userId) {
+    const request = await BorrowRequest.findById(id)
+
+    if (!request || !['APPROVED', 'OVERDUE'].includes(request.status)) {
+        abort(400, 'Chỉ có thể yêu cầu trả thiết bị khi đơn đang được duyệt hoặc quá hạn')
+    }
+
+    // Kiểm tra quyền sở hữu
+    if (request.user.toString() !== userId.toString()) {
+        abort(403, 'Không có quyền yêu cầu trả thiết bị này')
+    }
+
+    request.status = 'RETURNING'
+    await request.save()
+}
+
+// Admin xác nhận trả thiết bị
+export async function confirmReturnDevice(id) {
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
         const request = await BorrowRequest.findById(id).session(session)
-        if (!request || request.status !== 'APPROVED') {
-            abort(400, 'Không thể trả thiết bị')
+        if (!request || request.status !== 'RETURNING') {
+            abort(400, 'Đơn không phải là đơn đang trả')
         }
 
         const device = await Device.findById(request.device).session(session)
@@ -199,6 +250,75 @@ export async function cancelBorrowRequest(id, userId) {
     await request.save()
 }
 
+// Đánh giá thiết bị sau khi mượn
+export async function createReview({ userId, requestId, rating, comment }) {
+    const request = await BorrowRequest.findOne({
+        _id: requestId,
+        user: userId,
+        status: 'RETURNED',
+    })
+
+    if (!request) {
+        abort(400, 'Đơn mượn không hợp lệ hoặc chưa trả thiết bị')
+    }
+
+    const existingReview = await Review.findOne({ request: requestId })
+    if (existingReview) {
+        abort(400, 'Đơn mượn này đã được đánh giá trước đó')
+    }
+
+    const review = await Review.create({
+        user: userId,
+        device: request.device,
+        request: requestId,
+        rating,
+        comment,
+    })
+
+    return review
+}
+
+// Lấy tất cả lịch sử mượn của người dùng (bao gồm đang mượn, đã trả, quá hạn)
+export async function getAllBorrowHistory({ user, page = 1, per_page = 10 } = {}) {
+    const skip = (page - 1) * per_page
+
+    const [borrowing, returned, overdue] = await Promise.all([
+        BorrowRequest.find({ status: 'APPROVED', user })
+            .populate('device')
+            .sort({ borrow_date: -1 }),
+
+        BorrowRequest.find({ status: 'RETURNED', user })
+            .populate('device')
+            .sort({ return_date: -1 }),
+
+        BorrowRequest.find({ status: 'OVERDUE', user })
+            .populate('device')
+            .sort({ return_date: 1 }),
+    ])
+
+    // Gộp tất cả, phân loại
+    return {
+        borrowing: {
+            total: borrowing.length,
+            page,
+            per_page,
+            data: borrowing.slice(skip, skip + per_page),
+        },
+        returned: {
+            total: returned.length,
+            page,
+            per_page,
+            data: returned.slice(skip, skip + per_page),
+        },
+        overdue: {
+            total: overdue.length,
+            page,
+            per_page,
+            data: overdue.slice(skip, skip + per_page),
+        },
+    }
+}
+
 // Thống kê đơn mượn (số lượng theo từng trạng thái)
 export async function getBorrowRequestStats(user) {
     const match = user ? {  user: new mongoose.Types.ObjectId(user) } : {}
@@ -218,7 +338,9 @@ export async function getBorrowRequestStats(user) {
         PENDING: 0,
         APPROVED: 0,
         REJECTED: 0,
+        RETURNING: 0,
         RETURNED: 0,
+        OVERDUE: 0,
         CANCELLED: 0,
     }
 

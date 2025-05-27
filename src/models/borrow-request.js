@@ -36,7 +36,7 @@ const BorrowRequest = createModel('BorrowRequest', 'borrow_requests', {
     },
     status: {
         type: String,
-        enum: ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'RETURNED'],
+        enum: ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED','RETURNING', 'RETURNED', 'OVERDUE'],
         default: 'PENDING',
     },
     note: {

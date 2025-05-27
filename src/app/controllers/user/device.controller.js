@@ -7,8 +7,13 @@ export async function getDevices(req, res) {
 }
 
 export async function getDeviceById(req, res) {
-    const device = await deviceService.getDeviceById(req.params.id)
-    res.json(device)
+    const { page = '1', per_page = '5' } = req.query
+    const result = await deviceService.getDeviceById(req.params.id, {
+        page,
+        per_page,
+    })
+
+    res.json(result)
 }
 
 

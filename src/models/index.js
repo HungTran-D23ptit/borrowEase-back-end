@@ -4,3 +4,5 @@ export { default as User } from './user'
 export { default as Device } from './device'
 export { default as BorrowRequest } from './borrow-request'
 export { default as Notification } from './notification'
+export { default as Review } from './review'
+

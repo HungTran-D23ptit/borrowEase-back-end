@@ -46,4 +46,9 @@ export async function activateUser(req, res) {
     })
 }
 
+export async function getUserStatistics(req, res) {
+    const stats = await userService.countUserStatistics()
+    res.json(stats)
+}
+
 

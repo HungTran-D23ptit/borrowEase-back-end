@@ -6,6 +6,8 @@ import * as authMiddleware from '@/app/middleware/user/auth.middleware'
 import * as deviceMiddleware from '@/app/middleware/user/device.middlewrae'
 import validate from '@/app/middleware/user/validate'
 import * as borrowRequest from '@/app/requests/user/borrow-request.request'
+import * as reviewRequest from '@/app/requests/user/review.request'
+
 
 const borrowRequestRouter = Router()
 
@@ -38,10 +40,10 @@ borrowRequestRouter.delete(
 )
 
 borrowRequestRouter.patch(
-    '/:id/return',
+    '/:id/request-return',
     asyncHandler(authMiddleware.checkValidToken),
     asyncHandler(borrowRequestMiddleware.checkBorrowRequestExists),
-    asyncHandler(borrowRequestController.returnDevice)
+    asyncHandler(borrowRequestController.requestReturnDevice)
 )
 
 borrowRequestRouter.get(
@@ -60,6 +62,20 @@ borrowRequestRouter.get(
     '/returned',
     asyncHandler(authMiddleware.checkValidToken),
     asyncHandler(borrowRequestController.getReturnedDevices)
+)
+
+borrowRequestRouter.post(
+    '/:id/review',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(borrowRequestMiddleware.checkBorrowRequestExists),
+    asyncHandler(validate(reviewRequest.createReviewSchema)),
+    asyncHandler(borrowRequestController.reviewDevice)
+)
+
+borrowRequestRouter.get(
+    '/history/all',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(borrowRequestController.getAllBorrowHistory)
 )
 
 borrowRequestRouter.get(

@@ -51,4 +51,10 @@ userRouter.post(
     asyncHandler(userController.activateUser)
 )
 
+userRouter.get(
+    '/statistic/total', 
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(userController.getUserStatistics)
+)
+
 export default userRouter

@@ -48,10 +48,14 @@ export async function cancelRequest(req, res) {
     res.json({ message: 'Đã hủy đơn mượn' })
 }
 
-// Trả thiết bị
-export async function returnDevice(req, res) {
-    await borrowRequestService.returnDevice(req.params.id)
-    res.json({ message: 'Đã trả thiết bị thành công' })
+// Yêu cầu trả thiết bị (User)
+export async function requestReturnDevice(req, res) {
+    const borrowRequestId = req.params.id
+    const userId = req.currentUser._id
+
+    await borrowRequestService.requestReturnDevice(borrowRequestId, userId)
+
+    res.json({ message: 'Đã gửi yêu cầu trả thiết bị' })
 }
 
 // Danh sách thiết bị đang mượn
@@ -75,8 +79,33 @@ export async function getReturnedDevices(req, res) {
     res.json(result)
 }
 
+// Đánh giá thiết bị đã mượn
+export async function reviewDevice(req, res) {
+    const review = await borrowRequestService.createReview({
+        userId: req.currentUser._id,
+        requestId: req.params.id,
+        rating: req.body.rating,
+        comment: req.body.comment
+    })
+
+    res.json({
+        message: 'Đánh giá thiết bị thành công',
+        review
+    })
+}
+
+// Lấy lịch sử mượn thiết bị của người dùng
+export async function getAllBorrowHistory(req, res) {
+    const result = await borrowRequestService.getAllBorrowHistory({
+        user: req.currentUser._id,
+        page: req.query.page,
+        per_page: req.query.per_page,
+    })
+    res.json(result)
+}
+
 // Thống kê đơn mượn theo trạng thái
 export async function getUserBorrowStats(req, res) {
-    const stats = await borrowRequestService.getBorrowRequestStats(req.currentUser._id)
-    res.json(stats)
+    const result = await borrowRequestService.getBorrowRequestStats(req.currentUser._id)
+    res.json(result)
 }

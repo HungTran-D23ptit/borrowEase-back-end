@@ -139,3 +139,41 @@ export async function activateUser(userId, session) {
     }
 }
 
+// Thống kê tổng số người dùng và trạng thái tài khoản
+export async function countUserStatistics() {
+    try {
+        const result = await User.aggregate([
+            {
+                $match: { deleted: false }
+            },
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+
+        let total = 0
+        let active = 0
+        let deActive = 0
+
+        for (const item of result) {
+            total += item.count
+            if (item._id === STATUS_ACCOUNT.ACTIVE) {
+                active = item.count
+            } else if (item._id === STATUS_ACCOUNT.DE_ACTIVE) {
+                deActive = item.count
+            }
+        }
+
+        return {
+            total,
+            active,
+            deActive
+        }
+    } catch (error) {
+        abort(500, 'Lỗi khi thống kê người dùng')
+    }
+}
+
