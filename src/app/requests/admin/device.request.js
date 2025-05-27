@@ -31,8 +31,8 @@ export const createDevice = Joi.object({
         .label('Mô tả'),
 
     status: Joi.string()
-        .valid('AVAILABLE', 'BORROWED', 'BROKEN', 'LOST')
-        .default('AVAILABLE')
+        .valid('NORMAL', 'MAINTENANCE')
+        .default('NORMAL')
         .label('Trạng thái'),
 
     quantity: Joi.number()

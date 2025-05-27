@@ -8,8 +8,13 @@ export async function getDevices(req, res) {
 }
 
 export async function getDeviceById(req, res) {
-    const device = await deviceService.getDeviceById(req.params.id)
-    res.json(device)
+    const { page = '1', per_page = '5' } = req.query
+    const result = await deviceService.getDeviceById(req.params.id, {
+        page,
+        per_page,
+    })
+
+    res.json(result)
 }
 
 export async function createDevice(req, res) {
@@ -37,4 +42,25 @@ export async function deleteDevice(req, res) {
         const result = await deviceService.deleteDevice(req.params.id, session)
         res.json(result)
     })
+}
+
+export async function getMostBorrowedDevices(req, res) {
+    const { month, year, limit } = req.query
+    const result = await deviceService.getMostBorrowedDevicesThisMonth({ month, year, limit })
+    res.json(result)
+}
+
+export async function markDeviceMaintenance(req, res) {
+    await db.transaction(async (session) => {
+        const updated = await deviceService.markDeviceAsMaintenance(req.params.id, session)
+        res.json({
+            message: 'Thiết bị đã được chuyển sang trạng thái bảo trì.',
+            data: updated,
+        })
+    })
+}
+
+export async function getTotalDevices(req, res) {
+    const total = await deviceService.countTotalDevices()
+    res.json({ total })
 }

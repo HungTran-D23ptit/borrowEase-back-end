@@ -65,6 +65,15 @@ export async function getBorrowRequestDetail(req, res) {
     res.jsonify(result)
 }
 
+// Xác nhận đã trả thiết bị 
+export async function confirmReturnDevice(req, res) {
+    const borrowRequestId = req.params.id
+
+    await borrowRequestService.confirmReturnDevice(borrowRequestId)
+
+    res.json({ message: 'Xác nhận trả thiết bị thành công' })
+}
+
 // Thống kê đơn theo trạng thái
 export async function getBorrowRequestStats(req, res) {
     const result = await borrowRequestService.getBorrowRequestStats()

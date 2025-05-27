@@ -25,8 +25,12 @@ const Device = createModel('Device', 'devices', {
     },
     status: {
         type: String,
-        enum: ['AVAILABLE', 'BORROWED', 'MAINTENANCE', 'LOST'],
-        default: 'AVAILABLE',
+        enum: ['NORMAL', 'MAINTENANCE'],
+        default: 'NORMAL',
+    },
+    is_available: {
+        type: Boolean,
+        default: true,
     },
     last_borrowed_at: {
         type: Date,

@@ -17,3 +17,13 @@ export async function checkCanApproveRequest(req, res, next) {
     }
     next()
 }
+
+export async function checkReturnRequestExists(req, res, next) {
+    const request = await BorrowRequest.findById(req.params.id)
+    if (!request) {
+        return abort(404, 'Đơn trả không tồn tại')
+    }
+
+    req.borrowRequest = request
+    next()
+}

@@ -43,6 +43,13 @@ borrowRequestRouter.get(
     asyncHandler(borrowRequestController.getOverdueDevices)
 )
 
+borrowRequestRouter.patch(
+    '/:id/confirm-return', 
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(borrowRequestMiddleware.checkReturnRequestExists),
+    asyncHandler(borrowRequestController.confirmReturnDevice)
+)
+
 borrowRequestRouter.get(
     '/returned',
     asyncHandler(authMiddleware.checkValidToken),

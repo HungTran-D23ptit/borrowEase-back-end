@@ -43,4 +43,23 @@ deviceRouter.delete(
     asyncHandler(deviceController.deleteDevice)
 )
 
+deviceRouter.get(
+    '/stats/most-borrowed',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(deviceController.getMostBorrowedDevices)
+)
+
+deviceRouter.patch(
+    '/:id/maintenance',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(deviceMiddleware.checkDeviceExists),
+    asyncHandler(deviceController.markDeviceMaintenance)
+)
+
+deviceRouter.get(
+    '/statistic/total',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(deviceController.getTotalDevices)
+)
+
 export default deviceRouter
