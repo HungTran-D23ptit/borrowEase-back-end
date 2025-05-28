@@ -1,5 +1,6 @@
-import * as deviceService from '@/app/services/device.service'
-import { db } from '@/configs'
+import * as deviceService from '../../services/device.service'
+import { db } from '../../../configs'
+import Device from '../../../models/device'
 
 export async function getDevices(req, res) {
     const { page = 1, per_page = 10, status, search } = req.query
@@ -63,4 +64,16 @@ export async function markDeviceMaintenance(req, res) {
 export async function getTotalDevices(req, res) {
     const total = await deviceService.countTotalDevices()
     res.json({ total })
+}
+
+// New API to get device types
+export async function getDeviceTypes(req, res) {
+    try {
+        await Promise.resolve()  // Thêm await để tránh lỗi ESLint require-await
+        const types = Device.schema.obj.type.enum
+        res.json({ types })
+    } catch (error) {
+        console.error('Lỗi trong getDeviceTypes:', error)
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách loại thiết bị' })
+    }
 }

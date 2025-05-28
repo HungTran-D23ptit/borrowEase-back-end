@@ -108,6 +108,11 @@ export async function getDeviceById(deviceId, { page = 1, per_page = 5 } = {}) {
         if (deviceObj.image_url && !deviceObj.image_url.startsWith('https')) {
             deviceObj.image_url = LINK_STATIC_URL + deviceObj.image_url
         }
+        if (device.type) {
+            deviceObj.type = device.type
+        } else {
+            deviceObj.type = null
+        }
 
         // Tổng số đánh giá
         const total = await Review.countDocuments({ device: device._id })

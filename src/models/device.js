@@ -10,6 +10,11 @@ const Device = createModel('Device', 'devices', {
         required: true,
         unique: true,
     },
+    type: {
+        type: String,
+        required: true,
+        enum: ['Camera Recorder', 'Camera', 'Microphone', 'LED Studio Light', 'Computer', 'Projector', 'Other'],
+    },
     description: {
         type: String,
         default: '',
