@@ -8,8 +8,8 @@ import dayjs from 'dayjs'
 // Thêm thiết bị
 export async function createDevice(data, session) {
     try {
-        if (data.image_url) {
-            data.image_url = await data.image_url.save()
+        if (data.image) {
+            data.image_url = await data.image.save()
         }
 
         const device = new Device(data)
@@ -24,9 +24,11 @@ export async function updateDevice(deviceId, data, session) {
     try {
         const device = await Device.findById(deviceId).session(session)
     
-        if (data.image_url) {
-            FileUpload.remove(device.image_url)
-            data.image_url = await data.image_url.save()
+        if (data.image) {
+            if (device.image_url) {
+                FileUpload.remove(device.image_url)
+            }
+            data.image_url = await data.image.save()
         }
 
         const updated = await Device.findByIdAndUpdate(deviceId, { $set: data }, { new: true, session })
