@@ -71,6 +71,12 @@ export async function markDeviceAsMaintenance(deviceId, session) {
     }
 }
 
+// Lấy danh sách loại thiết bị
+export function getDeviceTypes() {
+    const types = Device.schema.path('type')?.enumValues || []
+    return types
+}
+
 // Lấy danh sách thiết bị
 export async function getDevices({page = 1, per_page = 10, status, type, search}) {
     try {

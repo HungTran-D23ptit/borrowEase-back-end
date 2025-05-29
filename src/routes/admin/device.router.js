@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { asyncHandler } from '../../utils/helpers'
-import * as deviceController from '../../app/controllers/admin/device.controller'
-import * as deviceMiddleware from '../../app/middleware/admin/device.middleware'
-import validate from '../../app/middleware/admin/validate'
-import * as deviceRequest from '../../app/requests/admin/device.request'
-import * as authMiddleware from '../../app/middleware/admin/auth.middleware'
+import { asyncHandler } from '@/utils/helpers'
+import * as deviceController from '@/app/controllers/admin/device.controller'
+import * as deviceMiddleware from '@/app/middleware/admin/device.middleware'
+import validate from '@/app/middleware/admin/validate'
+import * as deviceRequest from '@/app/requests/admin/device.request'
+import * as authMiddleware from '@/app/middleware/admin/auth.middleware'
 
 const deviceRouter = Router()
 
