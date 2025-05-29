@@ -68,10 +68,5 @@ deviceRouter.get(
     asyncHandler(deviceController.getTotalDevices)
 )
 
-deviceRouter.get(
-    '/types',
-    asyncHandler(authMiddleware.checkValidToken),
-    asyncHandler(deviceController.getDeviceTypes)
-)
 
 export default deviceRouter
