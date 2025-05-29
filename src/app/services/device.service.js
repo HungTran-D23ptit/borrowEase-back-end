@@ -8,8 +8,8 @@ import dayjs from 'dayjs'
 // Thêm thiết bị
 export async function createDevice(data, session) {
     try {
-        if (data.image_url) {
-            data.image_url = await data.image_url.save()
+        if (data.image) {
+            data.image_url = await data.image.save()
         }
 
         const device = new Device(data)
@@ -24,9 +24,11 @@ export async function updateDevice(deviceId, data, session) {
     try {
         const device = await Device.findById(deviceId).session(session)
     
-        if (data.image_url) {
-            FileUpload.remove(device.image_url)
-            data.image_url = await data.image_url.save()
+        if (data.image) {
+            if (device.image_url) {
+                FileUpload.remove(device.image_url)
+            }
+            data.image_url = await data.image.save()
         }
 
         const updated = await Device.findByIdAndUpdate(deviceId, { $set: data }, { new: true, session })
@@ -69,11 +71,18 @@ export async function markDeviceAsMaintenance(deviceId, session) {
     }
 }
 
+// Lấy danh sách loại thiết bị
+export function getDeviceTypes() {
+    const types = Device.schema.path('type')?.enumValues || []
+    return types
+}
+
 // Lấy danh sách thiết bị
-export async function getDevices({page = 1, per_page = 10, status, search}) {
+export async function getDevices({page = 1, per_page = 10, status, type, search}) {
     try {
         const query = {deleted: false}
         if (status) query.status = status
+        if (type) query.type = type
         if (search) {
             query.$or = [{name: new RegExp(search, 'i')}, {code: new RegExp(search, 'i')}]
         }
@@ -107,6 +116,11 @@ export async function getDeviceById(deviceId, { page = 1, per_page = 5 } = {}) {
 
         if (deviceObj.image_url && !deviceObj.image_url.startsWith('https')) {
             deviceObj.image_url = LINK_STATIC_URL + deviceObj.image_url
+        }
+        if (device.type) {
+            deviceObj.type = device.type
+        } else {
+            deviceObj.type = null
         }
 
         // Tổng số đánh giá

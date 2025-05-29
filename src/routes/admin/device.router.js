@@ -15,6 +15,12 @@ deviceRouter.get(
 )
 
 deviceRouter.get(
+    '/types',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(deviceController.getDeviceTypes)
+)
+
+deviceRouter.get(
     '/:id',
     asyncHandler(authMiddleware.checkValidToken),
     asyncHandler(deviceMiddleware.checkDeviceExists),
@@ -61,5 +67,6 @@ deviceRouter.get(
     asyncHandler(authMiddleware.checkValidToken),
     asyncHandler(deviceController.getTotalDevices)
 )
+
 
 export default deviceRouter

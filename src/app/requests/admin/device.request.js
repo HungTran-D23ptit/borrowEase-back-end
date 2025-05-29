@@ -24,6 +24,11 @@ export const createDevice = Joi.object({
                 return !existing ? value : helpers.error('any.exists')
             })
         ),
+        
+    type: Joi.string()
+        .required()
+        .valid('Camera Recorder', 'Camera', 'Microphone', 'LED Studio Light', 'Computer', 'Projector', 'Other')
+        .label('Loại thiết bị'),
 
     description: Joi.string()
         .max(500)
