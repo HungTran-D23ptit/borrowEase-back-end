@@ -3,8 +3,8 @@ import { db } from '../../../configs'
 import Device from '../../../models/device'
 
 export async function getDevices(req, res) {
-    const { page = 1, per_page = 10, status, search } = req.query
-    const result = await deviceService.getDevices({ page, per_page, status, search })
+    const { page = 1, per_page = 10, status, type, search } = req.query
+    const result = await deviceService.getDevices({ page, per_page, status, type, search })
     res.json(result)
 }
 

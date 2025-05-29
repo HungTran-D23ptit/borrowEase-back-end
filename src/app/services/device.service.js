@@ -72,10 +72,11 @@ export async function markDeviceAsMaintenance(deviceId, session) {
 }
 
 // Lấy danh sách thiết bị
-export async function getDevices({page = 1, per_page = 10, status, search}) {
+export async function getDevices({page = 1, per_page = 10, status, type, search}) {
     try {
         const query = {deleted: false}
         if (status) query.status = status
+        if (type) query.type = type
         if (search) {
             query.$or = [{name: new RegExp(search, 'i')}, {code: new RegExp(search, 'i')}]
         }
