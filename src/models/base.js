@@ -19,3 +19,10 @@ export const STATUS_ACCOUNT = {
     ACTIVE: 'ACTIVE',
     DE_ACTIVE: 'DE_ACTIVE',
 }
+
+export const LOGIN_PROVIDER = {
+    LOCAL: 'LOCAL',
+    GOOGLE: 'GOOGLE',
+    FACEBOOK: 'FACEBOOK',
+    APPLE: 'APPLE',
+}

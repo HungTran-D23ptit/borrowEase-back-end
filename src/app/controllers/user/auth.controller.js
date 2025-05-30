@@ -28,3 +28,32 @@ export async function register(req, res) {
         user
     })
 }
+
+export async function loginWithGoogle(req, res) {
+    const { id_token } = req.body
+    const result = await authService.handleLoginWithGoogle(id_token)
+    res.jsonify(result)
+}
+
+export async function changePassword(req, res) {
+    const userId = req.currentUser._id
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+        abort(400, 'Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới.')
+    }
+
+    await authService.changePassword(userId, currentPassword, newPassword)
+    res.jsonify({ message: 'Đổi mật khẩu thành công.' })
+}
+
+export async function forgotPassword(req, res) {
+    const { email } = req.body
+    const result = await authService.handleForgotPassword(email)
+    res.jsonify(result)
+}
+
+export async function resetPassword(req, res) {
+    const result = await authService.handleResetPassword(req.body)
+    res.jsonify(result)
+}

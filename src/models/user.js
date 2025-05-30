@@ -1,4 +1,4 @@
-import createModel, { STATUS_ACCOUNT } from './base'
+import createModel, { STATUS_ACCOUNT, LOGIN_PROVIDER } from './base'
 import bcrypt from 'bcrypt'
 
 const User = createModel(
@@ -44,6 +44,11 @@ const User = createModel(
                 const salt = bcrypt.genSaltSync(10)
                 return bcrypt.hashSync(value, salt)
             },
+        },
+        login_provider: {
+            type: String,
+            enum: Object.values(LOGIN_PROVIDER),
+            default: LOGIN_PROVIDER.LOCAL,
         },
         status: {
             type: String,
