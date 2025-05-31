@@ -3,6 +3,7 @@ import path from 'path'
 import serveFavicon from 'serve-favicon'
 import helmet from 'helmet'
 import multer from 'multer'
+import './jobs/index.js'
 import {APP_DEBUG, NODE_ENV, PUBLIC_DIR, VIEW_DIR} from './configs'
 
 import {jsonify, sendMail} from './handlers/response.handler'
