@@ -26,7 +26,7 @@ const Device = createModel('Device', 'devices', {
     quantity: {
         type: Number,
         default: 1,
-        min: 1,
+        min: 0,
     },
     status: {
         type: String,

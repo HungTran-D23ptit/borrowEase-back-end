@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { BorrowRequest, Device, Review } from '@/models'
 import { abort } from '@/utils/helpers'
+import { createApprovedNotification } from '@/app/services/notification.service'
 
 // Tạo đơn mượn thiết bị
 export async function createBorrowRequest(userId, data, session) {
@@ -55,7 +56,6 @@ export async function approveRequest(id) {
     session.startTransaction()
     try {
         const request = await BorrowRequest.findById(id).session(session)
-
         const device = await Device.findById(request.device).session(session)
 
         if (device.quantity < request.quantity) {
@@ -68,8 +68,22 @@ export async function approveRequest(id) {
         request.status = 'APPROVED'
         await request.save({ session })
 
+        // Populate user + device sau khi save
+        const populated = await BorrowRequest.findById(request._id)
+            .populate('user device')
+
+        await createApprovedNotification({
+            user: populated.user, 
+            device: populated.device,
+            quantity: request.quantity,
+            returnDate: request.return_date,
+            borrowRequestId: request._id,
+        })
+
         await session.commitTransaction()
         session.endSession()
+
+        return request
     } catch (error) {
         await session.abortTransaction()
         session.endSession()
