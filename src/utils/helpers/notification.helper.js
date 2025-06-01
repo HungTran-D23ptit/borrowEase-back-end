@@ -1,5 +1,19 @@
 import mailTransporter from '@/configs/mail-transporter'
 
+// Định dạng ngày giờ theo chuẩn Việt Nam: "HH:mm dd/MM/yyyy"
+export function formatDateTimeVN(date) {
+    if (!(date instanceof Date)) date = new Date(date)
+
+    const time = date.toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    })
+
+    const day = date.toLocaleDateString('vi-VN')
+    return `${time} ${day}`
+}
+
 // Hàm gửi email tổng quát
 export async function sendEmail({ to, subject, html }) {
     const info = await mailTransporter.sendMail({
@@ -9,7 +23,7 @@ export async function sendEmail({ to, subject, html }) {
         html,
     })
 
-    console.log(`Email sent to ${to}:`, info.messageId)
+    console.log(`✅ Email sent to ${to}:`, info.messageId)
 }
 
 // Gửi OTP xác thực (reset mật khẩu)
@@ -21,7 +35,7 @@ export async function sendOtp(user, otp) {
     await sendEmail({
         to: user.email,
         subject: 'Mã xác thực OTP',
-        html
+        html,
     })
 }
 
@@ -29,18 +43,7 @@ export async function sendOtp(user, otp) {
 export async function sendRequestApprovedEmail(user, device, quantity, returnDate) {
     if (!user?.email) return
 
-    const date = new Date(returnDate)
-    const formattedDate = date.toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    })
-    const formattedTime = date.toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-    })
-    const formattedReturnDate = `${formattedTime} ${formattedDate}`
+    const formattedReturnDate = formatDateTimeVN(returnDate)
 
     const html = `
         <p>Xin chào <strong>${user.name}</strong>,</p>
@@ -52,21 +55,15 @@ export async function sendRequestApprovedEmail(user, device, quantity, returnDat
     await sendEmail({
         to: user.email,
         subject: 'Yêu cầu mượn thiết bị đã được duyệt',
-        html
+        html,
     })
 }
-
 
 // Gửi nhắc sắp đến hạn trả
 export async function sendReminderEmail(user, device, returnDate) {
     if (!user?.email) return
 
-    const date = new Date(returnDate)
-    const formattedReturnDate = `${date.toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-    })} ${date.toLocaleDateString('vi-VN')}`
+    const formattedReturnDate = formatDateTimeVN(returnDate)
 
     const html = `
         <p>Xin chào <strong>${user.name}</strong>,</p>
@@ -78,18 +75,33 @@ export async function sendReminderEmail(user, device, returnDate) {
     await sendEmail({
         to: user.email,
         subject: 'Thiết bị sắp đến hạn trả',
-        html
+        html,
     })
 }
 
-// Gửi cảnh báo quá hạn
+// Gửi cảnh báo quá hạn cho user
+export async function sendOverdueEmailToUser(user, device, returnDate) {
+    if (!user?.email) return
+
+    const formattedReturnDate = formatDateTimeVN(returnDate)
+
+    const html = `
+        <p>Xin chào <strong>${user.name}</strong>,</p>
+        <p>Thiết bị <strong>${device.name}</strong> bạn đã mượn đã <strong>quá hạn trả</strong> từ: <strong>${formattedReturnDate}</strong>.</p>
+        <p>Vui lòng nhanh chóng liên hệ và hoàn trả thiết bị.</p>
+        <p>Trân trọng,<br/>Hệ thống mượn thiết bị.</p>
+    `
+
+    await sendEmail({
+        to: user.email,
+        subject: 'Cảnh báo quá hạn trả thiết bị',
+        html,
+    })
+}
+
+// Gửi cảnh báo quá hạn cho admin
 export async function sendOverdueAlertToAdmins(admins, user, device, returnDate) {
-    const date = new Date(returnDate)
-    const formattedReturnDate = `${date.toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-    })} ${date.toLocaleDateString('vi-VN')}`
+    const formattedReturnDate = formatDateTimeVN(returnDate)
 
     for (const admin of admins) {
         if (!admin?.email) continue
@@ -108,29 +120,3 @@ export async function sendOverdueAlertToAdmins(admins, user, device, returnDate)
         })
     }
 }
-
-// Gửi cảnh báo quá hạn trả thiết bị cho user
-export async function sendOverdueEmailToUser(user, device, returnDate) {
-    if (!user?.email) return
-
-    const date = new Date(returnDate)
-    const formattedReturnDate = `${date.toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-    })} ${date.toLocaleDateString('vi-VN')}`
-
-    const html = `
-        <p>Xin chào <strong>${user.name}</strong>,</p>
-        <p>Thiết bị <strong>${device.name}</strong> bạn đã mượn đã <strong>quá hạn trả</strong> từ: <strong>${formattedReturnDate}</strong>.</p>
-        <p>Vui lòng nhanh chóng liên hệ và hoàn trả thiết bị.</p>
-        <p>Trân trọng,<br/>Hệ thống mượn thiết bị.</p>
-    `
-
-    await sendEmail({
-        to: user.email,
-        subject: 'Cảnh báo quá hạn trả thiết bị',
-        html
-    })
-}
-
