@@ -61,7 +61,12 @@ export async function getReturnedDevices(req, res) {
 
 // Lấy chi tiết đơn mượn
 export async function getBorrowRequestDetail(req, res) {
-    const result = await borrowRequestService.getBorrowRequestDetail(req.params.id)
+    const isAdmin = req.user?.constructor?.modelName === 'Admin'
+    const result = await borrowRequestService.getBorrowRequestDetail({
+        id: req.params.id,
+        user: req.user?._id,
+        isAdmin,
+    })
     res.jsonify(result)
 }
 
@@ -71,7 +76,7 @@ export async function confirmReturnDevice(req, res) {
 
     await borrowRequestService.confirmReturnDevice(borrowRequestId)
 
-    res.json({ message: 'Xác nhận trả thiết bị thành công' })
+    res.jsonify({ message: 'Xác nhận trả thiết bị thành công' })
 }
 
 // Thống kê đơn theo trạng thái
