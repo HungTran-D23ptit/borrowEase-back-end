@@ -39,13 +39,13 @@ export async function getRequestDetail(req, res) {
         user: req.currentUser._id,
     })
 
-    res.jsonify(request)
+    res.json(request)
 }
 
 // Hủy đơn mượn (nếu chưa duyệt)
 export async function cancelRequest(req, res) {
     await borrowRequestService.cancelBorrowRequest(req.params.id, req.currentUser._id)
-    res.jsonify({ message: 'Đã hủy đơn mượn' })
+    res.json({ message: 'Đã hủy đơn mượn' })
 }
 
 // Yêu cầu trả thiết bị (User)
@@ -55,28 +55,28 @@ export async function requestReturnDevice(req, res) {
 
     await borrowRequestService.requestReturnDevice(borrowRequestId, userId)
 
-    res.jsonify({ message: 'Đã gửi yêu cầu trả thiết bị' })
+    res.json({ message: 'Đã gửi yêu cầu trả thiết bị' })
 }
 
 // Danh sách thiết bị đang mượn
 export async function getBorrowingDevices(req, res) {
     const { page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getBorrowingDevices({ user: req.currentUser._id, page, per_page })
-    res.jsonify(result)
+    res.json(result)
 }
 
 // Danh sách thiết bị quá hạn
 export async function getOverdueDevices(req, res) {
     const { page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getOverdueDevices({ user: req.currentUser._id, page, per_page })
-    res.jsonify(result)
+    res.json(result)
 }
 
 // Danh sách thiết bị đã trả
 export async function getReturnedDevices(req, res) {
     const { page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getReturnedDevices({ user: req.currentUser._id, page, per_page })
-    res.jsonify(result)
+    res.json(result)
 }
 
 // Đánh giá thiết bị đã mượn
@@ -88,7 +88,7 @@ export async function reviewDevice(req, res) {
         comment: req.body.comment
     })
 
-    res.jsonify({
+    res.json({
         message: 'Đánh giá thiết bị thành công',
         review
     })
@@ -101,11 +101,11 @@ export async function getAllBorrowHistory(req, res) {
         page: req.query.page,
         per_page: req.query.per_page,
     })
-    res.jsonify(result)
+    res.json(result)
 }
 
 // Thống kê đơn mượn theo trạng thái
 export async function getUserBorrowStats(req, res) {
     const result = await borrowRequestService.getBorrowRequestStats(req.currentUser._id)
-    res.jsonify(result)
+    res.json(result)
 }
