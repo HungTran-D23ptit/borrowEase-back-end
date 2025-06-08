@@ -16,5 +16,8 @@ export async function getDeviceById(req, res) {
     res.json(result)
 }
 
-
-
+export async function recommendDevices(req, res) {
+    const userId = req.currentUser._id
+    const result = await deviceService.getRecommendedDevices(userId)
+    res.json({ result })
+}

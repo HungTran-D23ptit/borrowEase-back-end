@@ -252,4 +252,60 @@ export async function getMostBorrowedDevicesThisMonth({ month, year, limit = 5 }
     }
 }
 
+// Đề xuất thiết bị cho user 
+export async function getRecommendedDevices(userId) {
+    const requests = await BorrowRequest.find({
+        user: userId,
+        status: { $in: ['APPROVED', 'RETURNED', 'OVERDUE'] },
+    }).populate('device')
+
+    if (!requests.length) {
+        // Fallback: thiết bị phổ biến còn sẵn hàng
+        return await Device.find({
+            quantity: { $gt: 0 },
+            deleted: false,
+        }).sort({ quantity: -1 }).limit(5)
+    }
+
+    const typeCount = {}
+    const borrowedDeviceIds = new Set()
+
+    for (const req of requests) {
+        const device = req.device
+        if (!device) continue
+        borrowedDeviceIds.add(String(device._id))
+        typeCount[device.type] = (typeCount[device.type] || 0) + 1
+    }
+
+    const sortedTypes = Object.entries(typeCount).sort((a, b) => b[1] - a[1])
+
+    // Thử đề xuất theo từng loại người dùng đã từng mượn, theo thứ tự ưu tiên
+    for (const [type] of sortedTypes) {
+        // Ưu tiên thiết bị chưa từng mượn
+        let found = await Device.find({
+            type,
+            _id: { $nin: Array.from(borrowedDeviceIds) },
+            quantity: { $gt: 0 },
+            deleted: false,
+        }).limit(5)
+
+        if (found.length > 0) return found
+
+        // Nếu không có thiết bị mới → gợi ý lại thiết bị từng mượn nhưng còn hàng
+        found = await Device.find({
+            type,
+            quantity: { $gt: 0 },
+            deleted: false,
+        }).limit(5)
+
+        if (found.length > 0) return found
+    }
+
+    // Nếu không có thiết bị cùng loại còn hàng, đề xuất thiết bị còn nhiều hàng nhất
+    return await Device.find({
+        quantity: { $gt: 0 },
+        deleted: false,
+    }).sort({ quantity: -1 }).limit(5)
+}
+
 
