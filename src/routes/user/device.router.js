@@ -19,4 +19,9 @@ deviceRouter.get(
     asyncHandler(deviceController.getDeviceById)
 )
 
+deviceRouter.get(
+    '/recommendations/me',
+    asyncHandler(authMiddleware.checkValidToken),
+    asyncHandler(deviceController.recommendDevices)
+)
 export default deviceRouter
