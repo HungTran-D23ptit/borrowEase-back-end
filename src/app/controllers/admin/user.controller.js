@@ -1,4 +1,5 @@
 import * as userService from '@/app/services/user.service'
+import * as adminLogService from '@/app/services/admin-action-log.service'
 import { db } from '@/configs'
 
 export async function getUsers(req, res) {
@@ -15,6 +16,14 @@ export async function getUserProfile(req, res) {
 export async function createUser(req, res) {
     await db.transaction(async (session) => {
         const user = await userService.createUser(req.body, session)
+
+        await adminLogService.log({
+            admin: req.currentAdmin._id,
+            action: 'Tạo tài khoản người dùng',
+            targetType: 'User',
+            targetId: user._id,
+        })
+
         res.status(201).jsonify({
             message: 'Người dùng đã được tạo thành công.',
             data: user
@@ -25,6 +34,14 @@ export async function createUser(req, res) {
 export async function updateUser(req, res) {
     await db.transaction(async (session) => {
         const updatedUser = await userService.updateUserProfile(req.params.id, req.body, session)
+
+        await adminLogService.log({
+            admin: req.currentAdmin._id,
+            action: 'Cập nhật tài khoản người dùng',
+            targetType: 'User',
+            targetId: req.params.id,
+        })
+
         res.jsonify({
             message: 'Cập nhật thông tin người dùng thành công.',
             data: updatedUser
@@ -35,6 +52,14 @@ export async function updateUser(req, res) {
 export async function deleteUser(req, res) {
     await db.transaction(async (session) => {
         const result = await userService.deleteUser(req.params.id, session)
+
+        await adminLogService.log({
+            admin: req.currentAdmin._id,
+            action: 'Khóa tài khoản người dùng',
+            targetType: 'User',
+            targetId: req.params.id,
+        })
+
         res.jsonify(result)
     })
 }
@@ -42,10 +67,17 @@ export async function deleteUser(req, res) {
 export async function activateUser(req, res) {
     await db.transaction(async (session) => {
         const result = await userService.activateUser(req.params.id, session)
+
+        await adminLogService.log({
+            admin: req.currentAdmin._id,
+            action: 'Mở khóa tài khoản người dùng',
+            targetType: 'User',
+            targetId: req.params.id,
+        })
+
         res.jsonify(result)
     })
 }
-
 export async function getUserStatistics(req, res) {
     const stats = await userService.countUserStatistics()
     res.json(stats)

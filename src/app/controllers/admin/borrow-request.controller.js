@@ -1,11 +1,23 @@
 import * as borrowRequestService from '@/app/services/borrow-request.service'
-import { db } from '@/configs'
+import * as adminLogService from '@/app/services/admin-action-log.service'
+import {db} from '@/configs'
 
 // Duyệt đơn mượn
 export async function approveRequest(req, res) {
     await db.transaction(async (session) => {
         await borrowRequestService.approveRequest(req.params.id, session)
-        res.jsonify({ message: 'Duyệt đơn mượn thành công' })
+
+        // Ghi log admin
+        await adminLogService.log(
+            req.currentAdmin._id,
+            'Duyệt đơn mượn',
+            'BorrowRequest',
+            req.params.id
+        )
+
+        res.json({
+            message: 'Duyệt đơn mượn thành công',
+        })
     })
 }
 
@@ -13,13 +25,24 @@ export async function approveRequest(req, res) {
 export async function rejectRequest(req, res) {
     await db.transaction(async (session) => {
         await borrowRequestService.rejectRequest(req.params.id, req.body.note, session)
-        res.jsonify({ message: 'Từ chối đơn mượn thành công' })
+
+        // Ghi log admin
+        await adminLogService.log(
+            req.currentAdmin._id,
+            'Từ chối đơn mượn',
+            'BorrowRequest',
+            req.params.id
+        )
+
+        res.json({
+            message: 'Từ chối đơn mượn thành công',
+        })
     })
 }
 
 // Lấy danh sách đơn mượn theo trạng thái
 export async function getRequests(req, res) {
-    const { status, page = 1, per_page = 10 } = req.query
+    const {status, page = 1, per_page = 10} = req.query
     const result = await borrowRequestService.getRequests({
         status,
         page,
@@ -30,7 +53,7 @@ export async function getRequests(req, res) {
 
 // Lấy thiết bị đang mượn
 export async function getBorrowingDevices(req, res) {
-    const { page = 1, per_page = 10 } = req.query
+    const {page = 1, per_page = 10} = req.query
     const result = await borrowRequestService.getBorrowingDevices({
         page,
         per_page,
@@ -40,7 +63,7 @@ export async function getBorrowingDevices(req, res) {
 
 // Lấy thiết bị quá hạn
 export async function getOverdueDevices(req, res) {
-    const { page = 1, per_page = 10 } = req.query
+    const {page = 1, per_page = 10} = req.query
     const result = await borrowRequestService.getOverdueDevices({
         page,
         per_page,
@@ -50,7 +73,7 @@ export async function getOverdueDevices(req, res) {
 
 // Lấy thiết bị đã trả
 export async function getReturnedDevices(req, res) {
-    const { user, page = 1, per_page = 10 } = req.query
+    const {user, page = 1, per_page = 10} = req.query
     const result = await borrowRequestService.getReturnedDevices({
         user,
         page,
@@ -70,13 +93,23 @@ export async function getBorrowRequestDetail(req, res) {
     res.jsonify(result)
 }
 
-// Xác nhận đã trả thiết bị 
+// Xác nhận đã trả thiết bị
 export async function confirmReturnDevice(req, res) {
     const borrowRequestId = req.params.id
 
     await borrowRequestService.confirmReturnDevice(borrowRequestId)
 
-    res.jsonify({ message: 'Xác nhận trả thiết bị thành công' })
+    // Ghi log admin
+    await adminLogService.log(
+        req.currentAdmin._id,
+        'Xác nhận trả thiết bị',
+        'BorrowRequest',
+        borrowRequestId
+    )
+
+    res.json({
+        message: 'Xác nhận trả thiết bị thành công',
+    })
 }
 
 // Thống kê đơn theo trạng thái
