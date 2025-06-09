@@ -264,7 +264,7 @@ export async function getRecommendedDevices(userId) {
         return await Device.find({
             quantity: { $gt: 0 },
             deleted: false,
-        }).sort({ quantity: -1 }).limit(5)
+        }).sort({ quantity: -1 }).limit(4)
     }
 
     const typeCount = {}
@@ -279,6 +279,9 @@ export async function getRecommendedDevices(userId) {
 
     const sortedTypes = Object.entries(typeCount).sort((a, b) => b[1] - a[1])
 
+    const recommendedDevices = []
+    const recommendedDeviceIds = new Set()
+
     // Thử đề xuất theo từng loại người dùng đã từng mượn, theo thứ tự ưu tiên
     for (const [type] of sortedTypes) {
         // Ưu tiên thiết bị chưa từng mượn
@@ -287,25 +290,51 @@ export async function getRecommendedDevices(userId) {
             _id: { $nin: Array.from(borrowedDeviceIds) },
             quantity: { $gt: 0 },
             deleted: false,
-        }).limit(5)
+        }).limit(4)
 
-        if (found.length > 0) return found
+        for (const device of found) {
+            if (recommendedDeviceIds.size >= 4) break
+            if (!recommendedDeviceIds.has(String(device._id))) {
+                recommendedDevices.push(device)
+                recommendedDeviceIds.add(String(device._id))
+            }
+        }
+        if (recommendedDeviceIds.size >= 4) break
 
         // Nếu không có thiết bị mới → gợi ý lại thiết bị từng mượn nhưng còn hàng
         found = await Device.find({
             type,
             quantity: { $gt: 0 },
             deleted: false,
-        }).limit(5)
+        }).limit(4)
 
-        if (found.length > 0) return found
+        for (const device of found) {
+            if (recommendedDeviceIds.size >= 4) break
+            if (!recommendedDeviceIds.has(String(device._id))) {
+                recommendedDevices.push(device)
+                recommendedDeviceIds.add(String(device._id))
+            }
+        }
+        if (recommendedDeviceIds.size >= 4) break
     }
 
     // Nếu không có thiết bị cùng loại còn hàng, đề xuất thiết bị còn nhiều hàng nhất
-    return await Device.find({
-        quantity: { $gt: 0 },
-        deleted: false,
-    }).sort({ quantity: -1 }).limit(5)
+    if (recommendedDeviceIds.size < 4) {
+        const found = await Device.find({
+            quantity: { $gt: 0 },
+            deleted: false,
+            _id: { $nin: Array.from(recommendedDeviceIds) }
+        }).sort({ quantity: -1 }).limit(4 - recommendedDeviceIds.size)
+
+        for (const device of found) {
+            if (!recommendedDeviceIds.has(String(device._id))) {
+                recommendedDevices.push(device)
+                recommendedDeviceIds.add(String(device._id))
+            }
+        }
+    }
+
+    return recommendedDevices
 }
 
 
