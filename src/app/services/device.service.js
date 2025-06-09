@@ -131,7 +131,7 @@ export async function getDeviceById(deviceId, { page = 1, per_page = 5 } = {}) {
             .sort({ createdAt: -1 })
             .skip((page - 1) * per_page)
             .limit(per_page)
-            .populate('user', 'full_name avatar')
+            .populate('user', 'name avatar')
             .lean()
 
         // Tính điểm trung bình đánh giá
