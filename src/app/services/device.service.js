@@ -72,9 +72,30 @@ export async function markDeviceAsMaintenance(deviceId, session) {
 }
 
 // Lấy danh sách loại thiết bị
-export function getDeviceTypes() {
+export async function getDeviceTypes() {
     const types = Device.schema.path('type')?.enumValues || []
-    return types
+
+    const counts = await Device.aggregate([
+        { $match: { deleted: false } },
+        {
+            $group: {
+                _id: '$type',
+                count: { $sum: 1 }
+            }
+        }
+    ])
+
+    const countMap = counts.reduce((acc, curr) => {
+        acc[curr._id] = curr.count
+        return acc
+    }, {})
+
+    const result = types.map(type => ({
+        type,
+        count: countMap[type] || 0
+    }))
+
+    return result 
 }
 
 // Lấy danh sách thiết bị
