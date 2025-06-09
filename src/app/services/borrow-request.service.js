@@ -296,7 +296,7 @@ export async function createReview({ userId, requestId, rating, comment }) {
 export async function getAllBorrowHistory({ user, page = 1, per_page = 10 } = {}) {
     const skip = (page - 1) * per_page
 
-    const [borrowing, returned, overdue] = await Promise.all([
+    const [borrowing, returned, overdue, totalReviews] = await Promise.all([
         BorrowRequest.find({ status: 'APPROVED', user })
             .populate('device')
             .sort({ borrow_date: -1 }),
@@ -308,9 +308,10 @@ export async function getAllBorrowHistory({ user, page = 1, per_page = 10 } = {}
         BorrowRequest.find({ status: 'OVERDUE', user })
             .populate('device')
             .sort({ return_date: 1 }),
+
+        Review.countDocuments({ user }), // Đếm số lượt đánh giá
     ])
 
-    // Gộp tất cả, phân loại
     return {
         borrowing: {
             total: borrowing.length,
@@ -330,6 +331,7 @@ export async function getAllBorrowHistory({ user, page = 1, per_page = 10 } = {}
             per_page,
             data: overdue.slice(skip, skip + per_page),
         },
+        total_reviews: totalReviews, 
     }
 }
 
