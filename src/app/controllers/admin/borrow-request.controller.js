@@ -5,12 +5,11 @@ import {db} from '@/configs'
 // Duyệt đơn mượn
 export async function approveRequest(req, res) {
     await db.transaction(async (session) => {
-        await borrowRequestService.approveRequest(req.params.id, session)
+        const request = await borrowRequestService.approveRequest(req.params.id, session)
 
-        // Ghi log admin
         await adminLogService.log(
             req.currentAdmin._id,
-            'Duyệt đơn mượn',
+            `Duyệt đơn mượn của người dùng ${request.user.name} thiết bị ${request.device.name}`,
             'BorrowRequest',
             req.params.id
         )
@@ -24,12 +23,11 @@ export async function approveRequest(req, res) {
 // Từ chối đơn mượn
 export async function rejectRequest(req, res) {
     await db.transaction(async (session) => {
-        await borrowRequestService.rejectRequest(req.params.id, req.body.note, session)
+        const request = await borrowRequestService.rejectRequest(req.params.id, req.body.note, session)
 
-        // Ghi log admin
         await adminLogService.log(
             req.currentAdmin._id,
-            'Từ chối đơn mượn',
+            `Từ chối đơn mượn của người dùng ${request.user.name} thiết bị ${request.device.name}`,
             'BorrowRequest',
             req.params.id
         )
@@ -95,20 +93,21 @@ export async function getBorrowRequestDetail(req, res) {
 
 // Xác nhận đã trả thiết bị
 export async function confirmReturnDevice(req, res) {
-    const borrowRequestId = req.params.id
+    await db.transaction(async (session) => {
+        const borrowRequestId = req.params.id
 
-    await borrowRequestService.confirmReturnDevice(borrowRequestId)
+        const request = await borrowRequestService.confirmReturnDevice(borrowRequestId, session)
 
-    // Ghi log admin
-    await adminLogService.log(
-        req.currentAdmin._id,
-        'Xác nhận trả thiết bị',
-        'BorrowRequest',
-        borrowRequestId
-    )
+        await adminLogService.log(
+            req.currentAdmin._id,
+            `Xác nhận trả thiết bị ${request.device.name} của người dùng ${request.user.name}`,
+            'BorrowRequest',
+            borrowRequestId
+        )
 
-    res.json({
-        message: 'Xác nhận trả thiết bị thành công',
+        res.json({
+            message: 'Xác nhận trả thiết bị thành công',
+        })
     })
 }
 

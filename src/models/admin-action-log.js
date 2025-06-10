@@ -12,12 +12,10 @@ const AdminActionLog = createModel(
         action: {
             type: String,
             required: true,
-            // Ví dụ: 'create_user', 'update_device', 'approve_borrow_request', ...
         },
         target_type: {
             type: String,
             required: true,
-            // Ví dụ: 'User', 'Device', 'BorrowRequest'
         },
         target_id: {
             type: ObjectId,
@@ -26,7 +24,6 @@ const AdminActionLog = createModel(
         description: {
             type: String,
             default: '',
-            // Mô tả chi tiết hành động, ví dụ: "Tạo user John Doe, email: john@example.com"
         },
         created_at: {
             type: Date,

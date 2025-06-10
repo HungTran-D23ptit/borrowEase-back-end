@@ -25,7 +25,7 @@ export async function createDevice(req, res) {
         // Ghi log hành động tạo thiết bị
         await adminLogService.log(
             req.currentAdmin._id,
-            'Tạo thiết bị',
+            `Tạo thiết bị ${device.name}`,
             'Device',
             device._id
         )
@@ -44,7 +44,7 @@ export async function updateDevice(req, res) {
         // Ghi log hành động cập nhật thiết bị
         await adminLogService.log(
             req.currentAdmin._id,
-            'Cập nhật thiết bị',
+            `Cập nhật thiết bị ${updated.name}`,
             'Device',
             updated._id
         )
@@ -63,7 +63,7 @@ export async function deleteDevice(req, res) {
         // Ghi log hành động xóa (khóa) thiết bị
         await adminLogService.log(
             req.currentAdmin._id,
-            'Xóa thiết bị',
+            `Xóa thiết bị ${result.name}`,
             'Device',
             req.params.id
         )
