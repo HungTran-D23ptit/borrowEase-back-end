@@ -8,7 +8,7 @@ import {getInterfaceIp} from './utils/helpers'
 // enable source maps
 sourceMapSupport.install()
 
-const host = process.env.HOST || 'localhost'
+const host = process.env.HOST || '0.0.0.0'
 const port = parseInt(process.env.PORT, 10) || 3456
 
 const app = createApp()
