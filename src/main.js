@@ -15,7 +15,7 @@ const app = createApp()
 db.connect().then(() => console.log('Database connection successful!'))
 
 // Run Server
-app.listen(port, host, async function () {
+app.listen(port, async function () {
     let displayHostname = host
     if (['0.0.0.0', '::'].includes(host)) {
         if (host === '0.0.0.0') {
