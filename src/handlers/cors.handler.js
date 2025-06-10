@@ -3,8 +3,8 @@ import {APP_URL_CLIENT, OTHER_URLS_CLIENT} from '@/configs'
 
 export const corsOptions = {
     origin: [
-        APP_URL_CLIENT, 
-        ...OTHER_URLS_CLIENT,
+        OTHER_URLS_CLIENT, 
+        ...APP_URL_CLIENT,
         'https://borrowease-frontend.netlify.app'  
     ],
     credentials: true,
