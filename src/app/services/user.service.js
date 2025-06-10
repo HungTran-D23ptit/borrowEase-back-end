@@ -89,13 +89,22 @@ export async function getUsers({ page = 1, per_page = 10 }) {
         const users = await User.find(query)
             .skip((page - 1) * per_page)
             .limit(per_page)
-            .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
+
+        // Convert avatar thành URL đầy đủ nếu cần
+        const usersWithAvatar = users.map((user) => {
+            const userObj = user.toObject()
+            if (userObj.avatar && !userObj.avatar.startsWith('http')) {
+                userObj.avatar = LINK_STATIC_URL + userObj.avatar
+            }
+            return userObj
+        })
 
         return {
             total,
             page,
             per_page,
-            data: users
+            data: usersWithAvatar,
         }
     } catch (error) {
         abort(500, 'Lỗi khi lấy danh sách người dùng')
@@ -119,7 +128,7 @@ export async function deleteUser(userId, session) {
         user.status = STATUS_ACCOUNT.DE_ACTIVE
         await user.save({ session })
 
-        return { message: 'Khóa tài khoản người dùng thành công' }
+        return user 
     } catch (error) {
         abort(500, 'Lỗi khi khóa tài khoản người dùng')
     }
@@ -133,7 +142,7 @@ export async function activateUser(userId, session) {
         user.status = STATUS_ACCOUNT.ACTIVE
         await user.save({ session })
 
-        return { message: 'Mở khóa tài khoản thành công' }
+        return user 
     } catch (error) {
         abort(500, 'Lỗi khi mở khóa tài khoản')
     }

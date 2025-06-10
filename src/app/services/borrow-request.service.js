@@ -70,7 +70,9 @@ export async function approveRequest(id) {
 
         // Populate user + device sau khi save
         const populated = await BorrowRequest.findById(request._id)
-            .populate('user device')
+            .populate('user', 'name')
+            .populate('device', 'name')
+            .session(session)
 
         await createApprovedNotification({
             user: populated.user, 
@@ -83,7 +85,7 @@ export async function approveRequest(id) {
         await session.commitTransaction()
         session.endSession()
 
-        return request
+        return populated 
     } catch (error) {
         await session.abortTransaction()
         session.endSession()
@@ -94,6 +96,7 @@ export async function approveRequest(id) {
 // Từ chối đơn mượn thiết bị
 export async function rejectRequest(id, note) {
     const request = await BorrowRequest.findById(id)
+
     if (!request || request.status !== 'PENDING') {
         abort(400, 'Không thể từ chối đơn')
     }
@@ -101,6 +104,13 @@ export async function rejectRequest(id, note) {
     request.status = 'REJECTED'
     request.note = note
     await request.save()
+
+    // Populate user và device để lấy thông tin tên
+    const populated = await BorrowRequest.findById(request._id)
+        .populate('user', 'name')
+        .populate('device', 'name')
+
+    return populated
 }
 
 // Lấy danh sách đơn mượn theo trạng thái 
@@ -240,8 +250,16 @@ export async function confirmReturnDevice(id) {
         request.actual_return_date = new Date()
         await request.save({ session })
 
+        // Populate user và device
+        const populated = await BorrowRequest.findById(request._id)
+            .populate('user', 'name')
+            .populate('device', 'name')
+            .session(session)
+
         await session.commitTransaction()
         session.endSession()
+
+        return populated
     } catch (error) {
         await session.abortTransaction()
         session.endSession()

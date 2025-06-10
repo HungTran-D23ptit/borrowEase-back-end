@@ -13,6 +13,7 @@ export async function log(adminId, action, targetType, targetId) {
         await logEntry.save()
         return logEntry
     } catch (error) {
+        console.log('Error logging admin action:', error)
         abort(500, 'Lỗi khi ghi lịch sử hoạt động của admin')
     }
 }

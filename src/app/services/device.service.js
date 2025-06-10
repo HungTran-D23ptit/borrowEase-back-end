@@ -46,7 +46,7 @@ export async function deleteDevice(deviceId) {
         if (!deletedDevice) {
             abort(404, 'Thiết bị không tồn tại hoặc đã bị xóa')
         }
-        return { message: 'Thiết bị đã được xóa thành công.' }
+        return deletedDevice
     } catch (error) {
         abort(500, 'Lỗi khi xoá thiết bị')
     }
@@ -132,12 +132,13 @@ export async function getDevices({page = 1, per_page = 10, status, type, search}
 export async function getDeviceById(deviceId, { page = 1, per_page = 5 } = {}) {
     try {
         const device = await Device.findById(deviceId)
-
         const deviceObj = device.toObject()
 
+        // Xử lý ảnh thiết bị
         if (deviceObj.image_url && !deviceObj.image_url.startsWith('https')) {
             deviceObj.image_url = LINK_STATIC_URL + deviceObj.image_url
         }
+
         if (device.type) {
             deviceObj.type = device.type
         } else {
@@ -154,6 +155,14 @@ export async function getDeviceById(deviceId, { page = 1, per_page = 5 } = {}) {
             .limit(per_page)
             .populate('user', 'name avatar')
             .lean()
+
+        // Xử lý avatar người dùng
+        const reviewsWithAvatar = reviews.map((review) => {
+            if (review.user?.avatar && !review.user.avatar.startsWith('http')) {
+                review.user.avatar = LINK_STATIC_URL + review.user.avatar
+            }
+            return review
+        })
 
         // Tính điểm trung bình đánh giá
         const avgResult = await Review.aggregate([
@@ -175,7 +184,7 @@ export async function getDeviceById(deviceId, { page = 1, per_page = 5 } = {}) {
                 total,
                 page,
                 per_page,
-                data: reviews,
+                data: reviewsWithAvatar,
             },
         }
     } catch (error) {
