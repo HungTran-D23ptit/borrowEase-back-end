@@ -5,7 +5,8 @@ export const corsOptions = {
     origin: [
         OTHER_URLS_CLIENT, 
         ...APP_URL_CLIENT,
-        'https://borrowease-frontend.netlify.app'  
+        'https://borrowease-frontend.netlify.app',
+        'http://localhost:8000'
     ],
     credentials: true,
 }
