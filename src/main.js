@@ -5,17 +5,21 @@ import createApp from '.'
 import executeScheduledTasks from './tasks'
 import {getInterfaceIp} from './utils/helpers'
 
-// enable source maps
 sourceMapSupport.install()
 
 const host = process.env.HOST || '0.0.0.0'
 const port = parseInt(process.env.PORT, 10) || 3456
 
 const app = createApp()
-db.connect().then(() => console.log('Database connection successful!'))
-
-// Run Server
-app.listen(port, async function () {
+db.connect()
+    .then(() => console.log('Database connection successful!'))
+    .catch((err) => {
+        console.error('Database connection failed:', err && err.message ? err.message : err)
+    })
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+})
+app.listen(port, host, async function () {
     let displayHostname = host
     if (['0.0.0.0', '::'].includes(host)) {
         if (host === '0.0.0.0') {
@@ -29,11 +33,7 @@ app.listen(port, async function () {
     }
     console.log(`Server is running on http://${displayHostname}:${port} in ${app.settings.env} mode.`)
 })
-
-// scheduled tasks
 executeScheduledTasks()
-
-// Eslint
 if (process.env.__ESLINT__ === 'true') {
     const command = 'npm'
     const args = ['run', 'lint:fix', '--silent']
