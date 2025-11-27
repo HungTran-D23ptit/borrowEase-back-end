@@ -5,6 +5,8 @@ import helmet from 'helmet'
 import multer from 'multer'
 import './jobs/index.js'
 import {APP_DEBUG, NODE_ENV, PUBLIC_DIR, VIEW_DIR} from './configs'
+import { apiLogger } from './app/middleware/apiLogger'
+
 
 import {jsonify, sendMail} from './handlers/response.handler'
 import corsHandler from './handlers/cors.handler'
@@ -42,7 +44,7 @@ function createApp() {
     app.use(multer({storage: multer.memoryStorage()}).any())
     app.use(formDataHandler)
     app.use(initLocalsHandler)
-
+    app.use(apiLogger)
     route(app)
 
     // Not found handler
