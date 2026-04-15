@@ -4,7 +4,7 @@
   "private": true,
   "author": "Vũ Xuân Hoàng <hoangvx@zent.vn>",
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "main": "src/main.js",
   "scripts": {
