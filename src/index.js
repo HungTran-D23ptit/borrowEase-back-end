@@ -35,10 +35,16 @@ function createApp() {
     if (APP_DEBUG) {
         app.use(httpRequestHandler)
     }
+    app.use(helmet({
+        crossOriginResourcePolicy: false,
+    }))
     app.use(serveFavicon(path.join(PUBLIC_DIR, 'favicon.ico')))
-    app.use('/static', express.static(PUBLIC_DIR))
+    app.use('/static', express.static(PUBLIC_DIR, {
+        setHeaders: (res) => {
+            res.set('Access-Control-Allow-Origin', '*')
+        },
+    }))
     app.use(limiter)
-    app.use(helmet())
     app.use(express.json())
     app.use(express.urlencoded({extended: true}))
     app.use(multer({storage: multer.memoryStorage()}).any())

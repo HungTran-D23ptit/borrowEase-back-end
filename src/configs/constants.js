@@ -38,14 +38,14 @@ export const APP_DEBUG = NODE_ENV === APP_ENV.DEVELOPMENT
 export const APP_NAME = process.env.APP_NAME
 assert(!_.isEmpty(APP_NAME), assertMsg('APP_NAME'))
 
-export const APP_URL_API = process.env.APP_URL_API
+export const APP_URL_API = process.env.APP_URL_API?.replace(/\/$/, '')
 assert(!_.isEmpty(APP_URL_API), assertMsg('APP_URL_API'))
 
-export const APP_URL_CLIENT = process.env.APP_URL_CLIENT
+export const APP_URL_CLIENT = process.env.APP_URL_CLIENT?.replace(/\/$/, '')
 assert(!_.isEmpty(APP_URL_CLIENT), assertMsg('APP_URL_CLIENT'))
 
 export const OTHER_URLS_CLIENT = process.env.OTHER_URLS_CLIENT
-    ? JSON.parse(process.env.OTHER_URLS_CLIENT)
+    ? JSON.parse(process.env.OTHER_URLS_CLIENT).map(url => url.replace(/\/$/, ''))
     : []
 assert(_.isArray(OTHER_URLS_CLIENT), 'OTHER_URLS_CLIENT must be an array.')
 

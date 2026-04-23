@@ -15,7 +15,7 @@
 *.pem
 /.env**
 !/.env.example
-/public/uploads
+# /public/uploads
 
 /private/cache/*
 /private/logs/*
