@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import sourceMapSupport from 'source-map-support'
 import {spawn} from 'child_process'
 import {db} from './configs'
