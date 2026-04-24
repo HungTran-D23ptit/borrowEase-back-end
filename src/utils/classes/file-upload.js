@@ -1,9 +1,6 @@
-import fs from 'fs'
-import path from 'path'
 import bytes from 'bytes'
 import mime from 'mime-types'
-import {PUBLIC_DIR, UUID_TRANSLATOR} from '@/configs'
-import sharp from 'sharp'
+import {UUID_TRANSLATOR} from '@/configs'
 import cloudinary from '@/configs/cloudinary'
 
 class FileUpload {
@@ -32,7 +29,7 @@ class FileUpload {
         return /^image\/(.*)\/?$/i.test(this.mimetype)
     }
 
-    async save(...paths) {
+    save(...paths) {
         if (!this.filepath) {
             return new Promise((resolve, reject) => {
                 const folder = [FileUpload.UPLOAD_FOLDER, ...paths].join('/')
