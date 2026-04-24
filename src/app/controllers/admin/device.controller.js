@@ -5,7 +5,7 @@ import { db } from '@/configs'
 export async function getDevices(req, res) {
     const { page = 1, per_page = 10, status, type, search } = req.query
     const result = await deviceService.getDevices({ page, per_page, status, type, search })
-    res.json(result)
+    res.jsonify(result)
 }
 
 export async function getDeviceById(req, res) {
@@ -15,7 +15,7 @@ export async function getDeviceById(req, res) {
         per_page,
     })
 
-    res.json(result)
+    res.jsonify(result)
 }
 
 export async function createDevice(req, res) {
@@ -30,10 +30,7 @@ export async function createDevice(req, res) {
             device._id
         )
 
-        res.status(201).json({
-            message: 'Thiết bị đã được tạo thành công.',
-            data: device,
-        })
+        res.jsonify(device, 'Thiết bị đã được tạo thành công.', 210)
     })
 }
 
@@ -49,10 +46,7 @@ export async function updateDevice(req, res) {
             updated._id
         )
 
-        res.json({
-            message: 'Cập nhật thiết bị thành công.',
-            data: updated,
-        })
+        res.jsonify(updated, 'Cập nhật thiết bị thành công.')
     })
 }
 
@@ -68,14 +62,14 @@ export async function deleteDevice(req, res) {
             req.params.id
         )
 
-        res.json(result)
+        res.jsonify(result)
     })
 }
 
 
 export async function getDeviceTypes(req, res) {
-    const types = await deviceService.getDeviceTypes()
-    res.jsonify({ types })
+    const result = await deviceService.getDeviceTypes()
+    res.jsonify(result)
 }
 
 export async function getMostBorrowedDevices(req, res) {
@@ -96,10 +90,7 @@ export async function markDeviceMaintenance(req, res) {
             updated._id
         )
 
-        res.json({
-            message: 'Thiết bị đã được chuyển sang trạng thái bảo trì.',
-            data: updated,
-        })
+        res.jsonify(updated, 'Thiết bị đã được chuyển sang trạng thái bảo trì.')
     })
 }
 
