@@ -39,7 +39,10 @@ class FileUpload {
                         resource_type: 'auto',
                     },
                     (error, result) => {
-                        if (error) return reject(error)
+                        if (error) {
+                            console.error('Cloudinary upload error:', error);
+                            return reject(error);
+                        }
                         this.filepath = result.secure_url
                         resolve(this.filepath)
                     }
