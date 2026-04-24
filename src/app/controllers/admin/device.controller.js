@@ -75,13 +75,13 @@ export async function deleteDevice(req, res) {
 
 export async function getDeviceTypes(req, res) {
     const types = await deviceService.getDeviceTypes()
-    res.json({ types })
+    res.jsonify({ types })
 }
 
 export async function getMostBorrowedDevices(req, res) {
     const { month, year, limit } = req.query
     const result = await deviceService.getMostBorrowedDevicesThisMonth({ month, year, limit })
-    res.json(result)
+    res.jsonify(result)
 }
 
 export async function markDeviceMaintenance(req, res) {
@@ -104,7 +104,7 @@ export async function markDeviceMaintenance(req, res) {
 }
 
 export async function getTotalDevices(req, res) {
-    const total = await deviceService.countTotalDevices()
-    res.json({ total })
+    const result = await deviceService.countTotalDevices()
+    res.jsonify(result)
 }
 
