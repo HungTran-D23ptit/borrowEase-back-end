@@ -26,7 +26,7 @@ export async function updateDevice(deviceId, data, session) {
     
         if (data.image) {
             if (device.image_url) {
-                FileUpload.remove(device.image_url)
+                await FileUpload.remove(device.image_url)
             }
             data.image_url = await data.image.save()
         }

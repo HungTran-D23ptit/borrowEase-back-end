@@ -4,6 +4,7 @@ import bytes from 'bytes'
 import mime from 'mime-types'
 import {PUBLIC_DIR, UUID_TRANSLATOR} from '@/configs'
 import sharp from 'sharp'
+import cloudinary from '@/configs/cloudinary'
 
 class FileUpload {
     static UPLOAD_FOLDER = 'uploads'
@@ -33,32 +34,40 @@ class FileUpload {
 
     async save(...paths) {
         if (!this.filepath) {
-            const uploadDir = path.join(PUBLIC_DIR, FileUpload.UPLOAD_FOLDER, ...paths)
-            fs.mkdirSync(uploadDir, {recursive: true})
-            if (this.isImage()) {
-                let image = sharp(this.buffer).webp({quality: 50})
-                const {width} = await image.metadata()
-                if (width > 1980) {
-                    image = image.resize(1980)
-                }
-                const filename = `${this.filename.split('.')[0]}.webp`
-                await image.toFile(path.join(uploadDir, filename))
-                this.filepath = path.posix.join(FileUpload.UPLOAD_FOLDER, ...paths, filename)
-            } else {
-                fs.writeFileSync(path.join(uploadDir, this.filename), this.buffer)
-                this.filepath = path.posix.join(FileUpload.UPLOAD_FOLDER, ...paths, this.filename)
-            }
-            return this.filepath
+            return new Promise((resolve, reject) => {
+                const folder = [FileUpload.UPLOAD_FOLDER, ...paths].join('/')
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: folder,
+                        resource_type: 'auto',
+                    },
+                    (error, result) => {
+                        if (error) return reject(error)
+                        this.filepath = result.secure_url
+                        resolve(this.filepath)
+                    }
+                )
+                uploadStream.end(this.buffer)
+            })
         } else {
             throw new Error('File saved. Use the "filepath" attribute to retrieve the file path.')
         }
     }
 
-    static remove(filepath) {
-        filepath = path.join(PUBLIC_DIR, filepath)
-        if (!fs.existsSync(filepath)) return
-        const stats = fs.statSync(filepath)
-        if (stats.isFile()) fs.unlinkSync(filepath)
+    static async remove(fileUrl) {
+        if (!fileUrl || !fileUrl.includes('cloudinary.com')) return
+        try {
+            // Trích xuất public_id từ URL Cloudinary
+            const parts = fileUrl.split('/')
+            const fileNameWithExt = parts.pop()
+            const fileName = fileNameWithExt.split('.')[0]
+            const folderPart = parts.slice(parts.indexOf(FileUpload.UPLOAD_FOLDER)).join('/')
+            const publicId = `${folderPart}/${fileName}`
+            
+            await cloudinary.uploader.destroy(publicId)
+        } catch (error) {
+            console.error('Error removing file from Cloudinary:', error)
+        }
     }
 }
 

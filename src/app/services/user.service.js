@@ -23,7 +23,7 @@ export async function updateAdminProfile(userId, profileData) {
     const user = await Admin.findOne({_id: userId, deleted: false})
 
     if (profileData.avatar) {
-        FileUpload.remove(user.avatar)
+        await FileUpload.remove(user.avatar)
         profileData.avatar = await profileData.avatar.save()
         user.avatar = profileData.avatar
     }
@@ -60,7 +60,7 @@ export async function updateUserProfile(userId, profileData) {
     const user = await User.findOne({_id: userId, deleted: false})
 
     if (profileData.avatar) {
-        FileUpload.remove(user.avatar)
+        await FileUpload.remove(user.avatar)
         profileData.avatar = await profileData.avatar.save()
         user.avatar = profileData.avatar
     }
