@@ -15,7 +15,8 @@ export async function createDevice(data, session) {
         const device = new Device(data)
         return await device.save({session})
     } catch (error) {
-        abort(500, 'Lỗi khi tạo thiết bị')
+        console.error('Error in createDevice service:', error);
+        abort(500, 'Lỗi khi tạo thiết bị: ' + error.message)
     }
 }
 

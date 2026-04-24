@@ -30,7 +30,7 @@ export async function createDevice(req, res) {
             device._id
         )
 
-        res.jsonify(device, 'Thiết bị đã được tạo thành công.', 210)
+        res.status(201).jsonify(device, 'Thiết bị đã được tạo thành công.')
     })
 }
 

@@ -1,6 +1,6 @@
 import * as borrowRequestService from '@/app/services/borrow-request.service'
 import * as adminLogService from '@/app/services/admin-action-log.service'
-import {db} from '@/configs'
+import { db } from '@/configs'
 
 // Duyệt đơn mượn
 export async function approveRequest(req, res) {
@@ -40,7 +40,7 @@ export async function rejectRequest(req, res) {
 
 // Lấy danh sách đơn mượn theo trạng thái
 export async function getRequests(req, res) {
-    const {status, page = 1, per_page = 10} = req.query
+    const { status, page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getRequests({
         status,
         page,
@@ -51,7 +51,7 @@ export async function getRequests(req, res) {
 
 // Lấy thiết bị đang mượn
 export async function getBorrowingDevices(req, res) {
-    const {page = 1, per_page = 10} = req.query
+    const { page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getBorrowingDevices({
         page,
         per_page,
@@ -61,7 +61,7 @@ export async function getBorrowingDevices(req, res) {
 
 // Lấy thiết bị quá hạn
 export async function getOverdueDevices(req, res) {
-    const {page = 1, per_page = 10} = req.query
+    const { page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getOverdueDevices({
         page,
         per_page,
@@ -71,7 +71,7 @@ export async function getOverdueDevices(req, res) {
 
 // Lấy thiết bị đã trả
 export async function getReturnedDevices(req, res) {
-    const {user, page = 1, per_page = 10} = req.query
+    const { user, page = 1, per_page = 10 } = req.query
     const result = await borrowRequestService.getReturnedDevices({
         user,
         page,
